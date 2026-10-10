@@ -1,0 +1,13 @@
+module.exports={
+funny:{n:"😂 Funny",
+t:["What's the most embarrassing thing you've googled?","What's your most cringe childhood memory?","Which friend here would survive longest in a zombie apocalypse and why?","What's the weirdest thing you do when you're alone?","What's a lie you told that got way out of hand?","Which of your habits would annoy {o} the most?"],
+d:["Talk in a robot voice until your next turn.","Do your best impression of {o} until someone guesses it's them.","Sing the chorus of any song using only animal sounds.","Do a dramatic slow-motion walk across the room.","Let {o} give you a silly nickname you must use for 3 rounds.","Speak only in questions until your next turn."]},
+romantic:{n:"💕 Romantic",
+t:["What's your idea of a perfect date?","What's the sweetest thing someone has done for you?","What song makes you think of love?","What do you notice first when you meet someone?","What's a love-movie scene you secretly adore?","What's the most romantic place you'd like to visit?"],
+d:["Recite a cheesy romantic poem to {o} with full drama.","Compliment {o} like a Bollywood hero/heroine.","Act out a dramatic movie confession scene with {o}.","Write a 2-line love poem about your favourite food.","Give {o} the sweetest genuine compliment you can think of.","Slow-dance with an imaginary partner for 15 seconds."]},
+spicy:{n:"🌶️ Spicy (safe)",
+t:["Who in this group would be the best flirt, and why?","What's your biggest turn-on in a personality (not looks)?","Have you ever had a crush on a friend's friend? Spill (no names needed).","What's the boldest text you've ever sent?","What's your most embarrassing crush moment?","Who here would you trust most with a secret?"],
+d:["Give {o} your best smoldering look for 10 seconds without laughing.","Do your best pick-up line on {o}.","Send a flirty-but-sweet emoji to your last chat (show everyone).","Whisper something dramatic to {o} that makes them laugh.","Do a runway walk like you own the room.","Read out the caption of your last selfie in a dramatic voice."]},
+hard:{n:"💪 Challenging",
+t:["Name 5 people you admire in 10 seconds, with reasons.","What's one fear you'd like to beat this year?","Rank everyone here by who is most likely to be famous. Defend it.","What's the hardest decision you've ever made?","What's something you've never told this group?","What's one thing you'd change about yourself, honestly?"],
+d:["Hold a plank for 30 seconds.","Do 15 squats while reciting the alphabet backwards.","Balance on one leg with eyes closed for 20 seconds.","Say a tongue twister 3 times fast without a mistake.","Hum a song while the group guesses it in 30 seconds.","Do 10 push-ups (knees allowed) while telling a joke."]}};

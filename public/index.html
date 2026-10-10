@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Truth or Dare – Friends Edition</title>
+<style>
+:root{--bg:#fff7fb;--card:#fff;--tx:#2a1830;--mu:#7a6a80;--ac:#e0388a;--ac2:#7b3fe4;--bd:#f0d9e6}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1020;--card:#27172f;--tx:#f7eaf8;--mu:#b9a3c0;--bd:#3d2748}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{margin:4px 0;font-size:1.7rem;text-align:center;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin:12px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+button,input{font:inherit;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:10px 14px}
+button{cursor:pointer}
+input{width:100%;margin:6px 0}
+button.p{background:linear-gradient(90deg,var(--ac),var(--ac2));color:#fff;border:0;font-weight:700}
+button.sel{outline:3px solid var(--ac)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.big{flex:1;min-width:130px;font-size:1.1rem;padding:14px}
+.score{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pl{text-align:center;border:2px solid var(--bd);border-radius:12px;padding:8px 4px;font-size:.9rem;word-break:break-word}
+.pl.on{border-color:var(--ac);background:rgba(224,56,138,.1);font-weight:700}
+.pl.off{opacity:.5}
+.pl b{display:block;font-size:1.3rem}
+.card{text-align:center;font-size:1.25rem;line-height:1.4;padding:18px 8px}
+.tag{display:inline-block;font-size:.75rem;padding:3px 10px;border-radius:99px;background:var(--ac2);color:#fff;margin-bottom:8px}
+.mu{color:var(--mu);font-size:.85rem}
+.log{font-size:.85rem;color:var(--mu);margin:0;padding-left:18px}
+.hide{display:none}
+</style></head><body><main>
+<h1>🔥 Truth or Dare 🔥</h1>
+<p class="mu" style="text-align:center">Friends Edition · play live from anywhere</p>
+
+<div id="join" class="box">
+  <b>Room code</b> <span class="mu">(everyone uses the same one)</span>
+  <input id="room" maxlength="8" placeholder="e.g. FRIENDS" autocapitalize="characters">
+  <b>Who are you?</b>
+  <div class="row" id="names" style="margin:6px 0"></div>
+  <input id="cname" maxlength="20" placeholder="…or type another name">
+  <button class="p big" id="go" style="width:100%;margin-top:8px">Join game</button>
+  <p class="mu" id="err"></p>
+</div>
+
+<div id="game" class="hide">
+  <div class="mu" style="text-align:center">Room <b id="rc"></b> · <span id="st"></span></div>
+  <div class="row" style="justify-content:center;margin:8px 0"><button id="inv">📋 Copy invite link</button></div>
+  <div class="box score" id="sc"></div>
+  <div class="box" id="act"></div>
+  <div class="box"><b>Recent</b><ul class="log" id="lg"></ul></div>
+  <div class="box mu">Truth = 1 pt · Dare = 2 · 💪 Challenging +1 bonus · Chickening out −1. Spicy is PG‑13 flirty fun; anyone can pass any time. The group judges “Done!”</div>
+  <div class="row" style="justify-content:center"><button id="rs">Reset scores</button></div>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const FR=["Nick","Navee","Sree","Thaslin","Treya","Srivarshini"];
+const LV={funny:"😂 Funny",romantic:"💕 Romantic",spicy:"🌶️ Spicy (safe)",hard:"💪 Challenging"};
+let ws,S=null,me="",room="",pick={kind:"",lvl:""},retry=0;
+const q=new URLSearchParams(location.search);
+$("room").value=(q.get("room")||localStorage.tod_room||"").toUpperCase();
+me=localStorage.tod_name||"";
+$("names").innerHTML=FR.map(n=>'<button data-n="'+n+'">'+n+"</button>").join("");
+function mark(){document.querySelectorAll("#names button").forEach(b=>b.classList.toggle("sel",b.dataset.n===me));}
+document.querySelectorAll("#names button").forEach(b=>b.onclick=()=>{me=b.dataset.n;$("cname").value="";mark()});
+if(me&&!FR.includes(me))$("cname").value=me;mark();
+function send(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
+function connect(){
+  ws=new WebSocket((location.protocol==="https:"?"wss://":"ws://")+location.host);
+  ws.onopen=()=>{retry=0;send({t:"join",room,name:me})};
+  ws.onmessage=e=>{const m=JSON.parse(e.data);
+    if(m.t==="joined"){room=m.room;try{localStorage.tod_room=room;localStorage.tod_name=me}catch(x){}
+      $("join").classList.add("hide");$("game").classList.remove("hide");$("rc").textContent=room}
+    if(m.t==="state"){S=m.s;render()}};
+  ws.onclose=()=>{$("st").textContent="🔴 reconnecting…";setTimeout(connect,Math.min(5000,1000*++retry))};
+}
+$("go").onclick=()=>{
+  me=($("cname").value.trim()||me).slice(0,20);room=$("room").value.trim().toUpperCase();
+  if(!me){$("err").textContent="Pick or type your name.";return}
+  if(!room){room=Math.random().toString(36).slice(2,6).toUpperCase();$("room").value=room}
+  $("err").textContent="";connect();
+};
+$("inv").onclick=async()=>{
+  const u=location.origin+"/?room="+room;
+  try{await navigator.clipboard.writeText(u);$("inv").textContent="✅ Copied!"}catch(e){prompt("Copy this link:",u)}
+  setTimeout(()=>$("inv").textContent="📋 Copy invite link",1500)};
+$("rs").onclick=()=>{if(confirm("Reset scores for everyone?"))send({t:"reset"})};
+function render(){
+  if(!S)return;const cur=S.players[S.turn],mine=me===cur;
+  $("st").textContent="🟢 live · "+S.online.length+" online";
+  $("sc").innerHTML=S.players.map((p,i)=>'<div class="pl'+(i===S.turn?" on":"")+(S.online.includes(p)?"":" off")+'">'+esc(p)+(p===me?" (you)":"")+"<b>"+(S.scores[p]||0)+"</b></div>").join("");
+  const a=$("act");
+  if(S.phase==="pick"){
+    let h='<div class="mu">Round '+S.round+'</div><h2 style="margin:4px 0">'+(mine?"Your turn, "+esc(cur)+"!":esc(cur)+"'s turn")+"</h2>";
+    h+='<div class="row"><button class="big'+(pick.kind==="truth"?" sel":"")+'" data-k="truth" '+(mine?"":"disabled")+'>🗣️ Truth</button><button class="big'+(pick.kind==="dare"?" sel":"")+'" data-k="dare" '+(mine?"":"disabled")+'>🎯 Dare</button></div><p class="mu">Pick a vibe:</p><div class="row">';
+    for(const k in LV)h+='<button data-l="'+k+'" class="'+(pick.lvl===k?"sel":"")+'" '+(mine?"":"disabled")+">"+LV[k]+"</button>";
+    h+='</div><div class="row" style="margin-top:12px"><button class="p big" id="rv" '+(mine&&pick.kind&&pick.lvl?"":"disabled")+'>Reveal 🎲</button><button id="sk">Skip turn</button></div>';
+    a.innerHTML=h;
+    a.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{pick.kind=b.dataset.k;render()});
+    a.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{pick.lvl=b.dataset.l;render()});
+    $("rv").onclick=()=>{send({t:"draw",kind:pick.kind,lvl:pick.lvl});pick={kind:"",lvl:""}};
+    $("sk").onclick=()=>send({t:"skip"});
+  }else{
+    const c=S.card;
+    a.innerHTML='<div class="card"><span class="tag">'+esc(c.who)+" · "+c.kind.toUpperCase()+" · "+c.lvlName+"</span><br>"+esc(c.text)+'</div><div class="row"><button class="p big" id="ok">✅ Done!</button><button class="big" id="no">🐔 Chickened out</button></div>';
+    $("ok").onclick=()=>send({t:"done",ok:true});$("no").onclick=()=>send({t:"done",ok:false});
+  }
+  $("lg").innerHTML=S.log.map(x=>"<li>"+esc(x)+"</li>").join("")||"<li>No moves yet – let's go!</li>";
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+</script></body></html>
